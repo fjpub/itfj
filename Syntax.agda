@@ -52,8 +52,8 @@ data Expr (Γ : Ctx) : Maybe Ty → Ty → Set where
 -- Inherently-typed values
 --------------------------
   
-data Val : Ty → Set where
-  VNew : ∀ {c d} → c <: d → All Val (fields (ξ Δ) c) → Val d
+data Val (d : Ty) : Set where
+  VNew : ∀ {c} → c <: d → All Val (fields (ξ Δ) c) → Val d
   
 -- Liftting de Bruijn index for 'fields'
 ----------------------------------------
