@@ -1,6 +1,3 @@
-# itfj
-Inherently-typed formalization of Featherweight Java
-
 # An Inherently-Typed Formalization for Featherweight Java
 Authors: Samuel Feitosa, Alejandro Mena, Rodrigo Ribeiro, Andre Du Bois
 
