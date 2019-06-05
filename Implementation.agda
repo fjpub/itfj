@@ -30,7 +30,7 @@ open WFCT
 
 record CImpl (τ : Ty) : Set where
   field
-    impls : All (λ s → Expr (proj₁ s) (just τ) (proj₂ s)) (signs (lookup τ (ξ Δ)))
+    impls : All (λ s → Expr (proj₁ s) (just τ) (proj₂ s)) (signs (lookup (ξ Δ) τ))
 
 open CImpl
 
@@ -65,7 +65,7 @@ cast-this-list p (x ∷ xs) = cast-this p x ∷ cast-this-list p xs
 ----------------------------------------------
 
 impl-this : (τ : Ty) → CTImpl 
-               → All (λ s → Expr (proj₁ s) (just τ) (proj₂ s)) (signs (lookup τ (ξ Δ)))
+               → All (λ s → Expr (proj₁ s) (just τ) (proj₂ s)) (signs (lookup (ξ Δ) τ))
 impl-this τ δ rewrite sym (lookup-allFin τ) = impls (lookupV τ δ)
 
 -- Getting the implementation of super classes
@@ -73,7 +73,7 @@ impl-this τ δ rewrite sym (lookup-allFin τ) = impls (lookupV τ δ)
 
 impl-supers : (τ : Ty) → CTImpl → (l : List (Σ Ty (λ σ → τ <: σ)))
     → All (λ s → Expr (proj₁ s) (just τ) (proj₂ s))
-           (concatMap (λ s → signs (lookup s (ξ Δ))) (Data.List.map proj₁ l))
+           (concatMap (λ s → signs (lookup (ξ Δ) s)) (Data.List.map proj₁ l))
 impl-supers τ δ [] = []
 impl-supers τ δ ((c , p) ∷ xs) rewrite sym (lookup-allFin c) =
   ++⁺ (Data.List.All.map (λ s → cast-this p s) (impls (lookupV c δ))) (impl-supers τ δ xs)
@@ -86,7 +86,7 @@ impl-supers τ δ ((c , p) ∷ xs) rewrite sym (lookup-allFin c) =
 --------------------------------------------------
 
 mapSuperProofs : (τ : Ty) → List (Σ Ty (λ σ → τ <: σ))
-mapSuperProofs τ = mapWith∈ (supers (lookup τ (ξ Δ))) (λ {s} idx → (s , exts idx))
+mapSuperProofs τ = mapWith∈ (supers (lookup (ξ Δ) τ)) (λ {s} idx → (s , exts idx))
 
 -- Equality between a list and the first projection 
 ---------------------------------------------------
@@ -99,8 +99,8 @@ eqMapProj (x ∷ l) f = cong (λ p → x ∷ p) (eqMapProj l (λ x → f (there 
 -- Equality between the super classes and the first projection
 --------------------------------------------------------------
 
-eqSupers : (τ : Ty) → Data.List.map proj₁ (mapSuperProofs τ) ≡ supers (lookup τ (ξ Δ))
-eqSupers τ = eqMapProj (supers (lookup τ (ξ Δ))) (λ {t} idx → exts {τ} {t} idx)
+eqSupers : (τ : Ty) → Data.List.map proj₁ (mapSuperProofs τ) ≡ supers (lookup (ξ Δ) τ)
+eqSupers τ = eqMapProj (supers (lookup (ξ Δ) τ)) (λ {t} idx → exts {τ} {t} idx)
 
 -----------------------------------------------------------------------
 -- Getting all the implementations of a class (this + super classes) --

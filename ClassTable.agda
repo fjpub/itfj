@@ -34,6 +34,7 @@ record CSig : Set where
 -- Table with Class Signatures
 ------------------------------
 
+CTSig : Set
 CTSig = Vec CSig n
 
 ---------------------------
@@ -45,17 +46,17 @@ CTSig = Vec CSig n
 
 fields : CTSig → Ty → List Ty
 fields ξ τ =
-  concatMap (λ τ₁ → CSig.flds (lookup τ₁ ξ)) (CSig.supers (lookup τ ξ)) ++ CSig.flds (lookup τ ξ)
+  concatMap (λ τ₁ → CSig.flds (lookup ξ τ₁)) (CSig.supers (lookup ξ τ)) ++ CSig.flds (lookup ξ τ)
 
 -- Obtaining method types form a class
 --------------------------------------
 
 signatures : CTSig → Ty → List (List Ty × Ty)
 signatures ξ τ =
-  concatMap (λ τ₁ → CSig.signs (lookup τ₁ ξ)) (CSig.supers (lookup τ ξ)) ++ CSig.signs (lookup τ ξ)
+  concatMap (λ τ₁ → CSig.signs (lookup ξ τ₁)) (CSig.supers (lookup ξ τ)) ++ CSig.signs (lookup ξ τ)
 
 signatures' : CTSig → Ty → List (List Ty × Ty)
-signatures' ξ τ = CSig.signs (lookup τ ξ)
+signatures' ξ τ = CSig.signs (lookup ξ τ)
 
 -- Well-formed class table definition
 -------------------------------------
@@ -64,10 +65,10 @@ record WFCT : Set where
   field
     ξ : CTSig
     wf-fields :
-      ∀ {τ₁ τ₂} → τ₂ ∈ CSig.supers (lookup τ₁ ξ)
+      ∀ {τ₁ τ₂} → τ₂ ∈ CSig.supers (lookup ξ τ₁)
                 → (fields ξ τ₂) ⊆ (fields ξ τ₁)
     wf-inheritance :
-      ∀ {τ₁ τ₂} → τ₂ ∈ CSig.supers (lookup τ₁ ξ)
-                 → CSig.supers (lookup τ₂ ξ) ⊆
-                    CSig.supers (lookup τ₁ ξ)
+      ∀ {τ₁ τ₂} → τ₂ ∈ CSig.supers (lookup ξ τ₁)
+                 → CSig.supers (lookup ξ τ₂) ⊆
+                    CSig.supers (lookup ξ τ₁)
 

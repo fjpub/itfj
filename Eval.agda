@@ -11,7 +11,7 @@ module Eval {n} (Δ : CT.WFCT n) where
 open import Data.Nat
 open import Data.List.All
 open import Data.Product
-open import Data.Maybe hiding (All)
+open import Data.Maybe
 open import Data.Vec.All renaming (All to AllV ; lookup to lookupV)
 open import Syntax Δ
 open import Implementation Δ
@@ -26,12 +26,17 @@ open CImpl
 Env : Ctx → Set
 Env Γ = All Val Γ
 
+-- The fuel is represented as a natural number
+----------------------------------------------
+
+Fuel = ℕ
+
 -- Mutual recursive evaluation functions definition
 ---------------------------------------------------
 
-eval      : ∀ {Γ τ c}  → ℕ → Maybe (Val τ) → CTImpl → Env Γ
+eval      : ∀ {Γ τ c}  → Fuel → Maybe (Val τ) → CTImpl → Env Γ
                        → Expr Γ (just τ) c → Maybe (Val c)
-eval-list : ∀ {Γ τ cs} → ℕ → Maybe (Val τ) → CTImpl → Env Γ
+eval-list : ∀ {Γ τ cs} → Fuel → Maybe (Val τ) → CTImpl → Env Γ
                        → All (Expr Γ (just τ)) cs → Maybe (All Val cs)
 
 -- Fuel based evaluation for a single expression

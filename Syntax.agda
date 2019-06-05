@@ -13,7 +13,7 @@ open import Data.List hiding (lookup)
 open import Data.List.Membership.Propositional
 open import Data.Vec
 open import Data.Vec.All renaming (lookup to lookupV) hiding (All)
-open import Data.Maybe hiding (All)
+open import Data.Maybe
 open import Data.Product
 open import Data.List.All hiding (lookup)
 open import Data.List.Relation.Sublist.Propositional renaming (lookup to ∈-lookup)
@@ -35,7 +35,7 @@ infix 3 _<:_
   
 data _<:_ : Ty → Ty → Set where
   refl : ∀ {τ} → τ <: τ
-  exts : ∀ {τ₁ τ₂} → τ₂ ∈ supers (lookup τ₁ (ξ Δ)) → τ₁ <: τ₂
+  exts : ∀ {τ₁ τ₂} → τ₂ ∈ supers (lookup (ξ Δ) τ₁) → τ₁ <: τ₂
 
 -- Inherently-typed expression definition
 -----------------------------------------
@@ -47,13 +47,13 @@ data Expr (Γ : Ctx) : Maybe Ty → Ty → Set where
   Invk  : ∀ {c m τ} → Expr Γ τ c → m ∈ (signatures (ξ Δ) c)
                     → All (Expr Γ τ) (proj₁ m) → Expr Γ τ (proj₂ m)
   New   : ∀ {τ} c   → All (Expr Γ τ) (fields (ξ Δ) c) → Expr Γ τ c
-  UCast : ∀ {C D τ} → C <: D → Expr Γ τ C → Expr Γ τ D
+  UCast : ∀ {c d τ} → c <: d → Expr Γ τ c → Expr Γ τ d
   
 -- Inherently-typed values
 --------------------------
   
-data Val (d : Ty) : Set where
-  VNew : ∀ {c} → c <: d → All Val (fields (ξ Δ) c) → Val d
+data Val : Ty → Set where
+  VNew : ∀ {c d} → c <: d → All Val (fields (ξ Δ) c) → Val d
   
 -- Liftting de Bruijn index for 'fields'
 ----------------------------------------
@@ -61,9 +61,7 @@ data Val (d : Ty) : Set where
 ∈-lift : ∀ {C D f} → C <: D → All Val (fields (ξ Δ) C)
        → f ∈ (fields (ξ Δ) D) → f ∈ (fields (ξ Δ) C)
 ∈-lift refl l i = i
-∈-lift {C} {D} (exts x) l i =
-  ∈-lookup {lzero} {Ty} {fields (ξ Δ) D} {fields (ξ Δ) C}
-            ((wf-fields Δ) {C} {D} x) i
+∈-lift {C} {D} (exts x) l i = ∈-lookup ((wf-fields Δ) x) i
 
 -- Proof of transitivity fort the inheritance relation
 ------------------------------------------------------
@@ -71,7 +69,5 @@ data Val (d : Ty) : Set where
 <:-trans : ∀ {τ₁ τ₂ τ₃} → τ₁ <: τ₂ → τ₂ <: τ₃ → τ₁ <: τ₃
 <:-trans refl p = p
 <:-trans (exts x) refl = exts x
-<:-trans {τ₁} {τ₂} {τ₃} (exts x) (exts x') =
-  exts (∈-lookup {lzero} {Ty} {supers (lookup τ₂ (ξ Δ))}
-       {supers (lookup τ₁ (ξ Δ))}
-       ((wf-inheritance Δ) {τ₁} {τ₂} x) x')
+<:-trans {τ₁} {τ₂} {τ₃} (exts x) (exts x') = exts (∈-lookup ((wf-inheritance Δ) x) x')
+
